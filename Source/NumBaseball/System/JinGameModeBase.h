@@ -35,12 +35,16 @@ public:
 	void SwitchTurn();
 	
 	bool CanPlayerChat(AJinPlayerController* PC);
+
+	void TurnTimer();
 	
 	FTimerHandle GameResetTimerHandle;
 	
 	FTimerHandle SwitchTurnDelayTimerHandle;
 	
 	FTimerHandle TurnTimeLimitTimerHandle;
+
+	FTimerHandle TurnTimerHandle;
 
 protected:
 	FString RandomNumber;

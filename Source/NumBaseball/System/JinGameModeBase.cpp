@@ -200,6 +200,8 @@ void AJinGameModeBase::ResetGame()
 	RandomNumber = GenerateRandomNum();
 	
 	AJinGameStateBase* JinGS = GetGameState<AJinGameStateBase>();
+
+	JinGS->RemainingTime = 30.0f;
 	
 	if(IsValid(JinGS))
 	{
@@ -223,6 +225,13 @@ void AJinGameModeBase::ResetGame()
 		&AJinGameModeBase::SwitchTurn,
 		TurnTimeLimit,
 		false);
+
+	GetWorldTimerManager().SetTimer(
+			TurnTimerHandle,
+			this,
+			&AJinGameModeBase::TurnTimer,
+			1.0f,
+			true);
 }
 
 void AJinGameModeBase::JudgeGame(AJinPlayerController* ChattingPlayerController, int StrikeCount)
@@ -249,6 +258,7 @@ void AJinGameModeBase::JudgeGame(AJinPlayerController* ChattingPlayerController,
 void AJinGameModeBase::SwitchTurn()
 {
 	GetWorldTimerManager().ClearTimer(TurnTimeLimitTimerHandle);
+	GetWorldTimerManager().ClearTimer(TurnTimerHandle);
 	
 	AJinGameStateBase* JinGS = GetGameState<AJinGameStateBase>();
 	
@@ -256,6 +266,8 @@ void AJinGameModeBase::SwitchTurn()
 	{
 		return;
 	}
+
+	JinGS->RemainingTime = 30.0f;
 	
 	if (JinGS->CurrentPlayer == nullptr)
 	{
@@ -276,6 +288,13 @@ void AJinGameModeBase::SwitchTurn()
 				&AJinGameModeBase::SwitchTurn,
 			TurnTimeLimit,
 			false);
+			
+			GetWorldTimerManager().SetTimer(
+			TurnTimerHandle,
+			this,
+			&AJinGameModeBase::TurnTimer,
+			1.0f,
+			true);
 		}
 		return;
 	}
@@ -309,11 +328,18 @@ void AJinGameModeBase::SwitchTurn()
 		}
 		
 		GetWorldTimerManager().SetTimer(
-		TurnTimeLimitTimerHandle,
-		this,
-		&AJinGameModeBase::SwitchTurn,
-		TurnTimeLimit,
-		false);
+			TurnTimeLimitTimerHandle,
+			this,
+			&AJinGameModeBase::SwitchTurn,
+			TurnTimeLimit,
+			false);
+
+		GetWorldTimerManager().SetTimer(
+			TurnTimerHandle,
+			this,
+			&AJinGameModeBase::TurnTimer,
+			1.0f,
+			true);
 	}
 }
 
@@ -333,4 +359,13 @@ bool AJinGameModeBase::CanPlayerChat(AJinPlayerController* PC)
 	}
 	
 	return true;
+}
+
+void AJinGameModeBase::TurnTimer()
+{
+	AJinGameStateBase* JinGS = GetGameState<AJinGameStateBase>();
+	if (IsValid(JinGS))
+	{
+		JinGS->RemainingTime--;
+	}
 }
