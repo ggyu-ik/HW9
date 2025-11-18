@@ -6,6 +6,11 @@
 #include "Components/SlateWrapperTypes.h"
 #include "System/JinPlayerState.h"
 
+AJinGameModeBase::AJinGameModeBase()
+	: TurnTimeLimit(30.0f)
+{
+}
+
 void AJinGameModeBase::OnPostLogin(AController* NewPlayer)
 {
 	Super::OnPostLogin(NewPlayer);
@@ -34,7 +39,6 @@ void AJinGameModeBase::OnPostLogin(AController* NewPlayer)
 	
 	if (AllPlayerControllers.Num() == 2) // 2명이상이 되면 첫 플레이어 정함
 	{
-		// 약간의 지연을 두고 SwitchTurn 호출 (PlayerState 복제 완료 대기)
 		GetWorldTimerManager().SetTimer(
 			SwitchTurnDelayTimerHandle,
 			this,
@@ -196,21 +200,29 @@ void AJinGameModeBase::ResetGame()
 	RandomNumber = GenerateRandomNum();
 	
 	AJinGameStateBase* JinGS = GetGameState<AJinGameStateBase>();
+	
 	if(IsValid(JinGS))
 	{
 		for (const auto& PC : AllPlayerControllers)
 		{
 			AJinPlayerState* JinPS = PC->GetPlayerState<AJinPlayerState>();
 			
-			PC->NotificationText = FText::FromString(FString::Printf(TEXT("%s 의 차례입니다."), *JinGS->CurrentPlayer->PlayerName));
-			PC->ClientRPCShowNotificationWidget(3.0f);
-			
 			if (IsValid(JinPS))
 			{
 				JinPS->CurrentGuessCount = 0;
 			}
+			
+			PC->NotificationText = FText::FromString(FString::Printf(TEXT("%s 의 차례입니다."), *JinGS->CurrentPlayer->PlayerName));
+			PC->ClientRPCShowNotificationWidget(TurnTimeLimit);
 		}
 	}
+
+	GetWorldTimerManager().SetTimer(
+		TurnTimeLimitTimerHandle,
+		this,
+		&AJinGameModeBase::SwitchTurn,
+		TurnTimeLimit,
+		false);
 }
 
 void AJinGameModeBase::JudgeGame(AJinPlayerController* ChattingPlayerController, int StrikeCount)
@@ -232,43 +244,12 @@ void AJinGameModeBase::JudgeGame(AJinPlayerController* ChattingPlayerController,
 		5.0f,
 		false);
 	}
-	/*else
-	{
-		SwitchTurn();
-		bool bIsDraw = true;
-		for (const auto& PC : AllPlayerControllers)
-		{
-			AJinPlayerState* JinPS = PC->GetPlayerState<AJinPlayerState>();
-			if (IsValid(JinPS))
-			{
-				if (JinPS->CurrentGuessCount < JinPS->MaxGuessCount)
-				{
-					bIsDraw = false;
-					break;
-				}
-			}
-		}
-		
-		if (bIsDraw)
-		{
-			for (const auto& PC : AllPlayerControllers)
-			{
-				PC->NotificationText = FText::FromString(TEXT("비겼습니다. 5초 후 새로운 게임이 시작됩니다."));
-				PC->ClientRPCShowNotificationWidget(5.0f);
-				
-				GetWorldTimerManager().SetTimer(
-				GameResetTimerHandle,
-				this,
-				&AJinGameModeBase::ResetGame,
-				5.0f,
-				false);
-			}
-		}
-	}*/
 }
 
 void AJinGameModeBase::SwitchTurn()
 {
+	GetWorldTimerManager().ClearTimer(TurnTimeLimitTimerHandle);
+	
 	AJinGameStateBase* JinGS = GetGameState<AJinGameStateBase>();
 	
 	if (!IsValid(JinGS) || AllPlayerControllers.Num() == 0)
@@ -279,14 +260,22 @@ void AJinGameModeBase::SwitchTurn()
 	if (JinGS->CurrentPlayer == nullptr)
 	{
 		AJinPlayerState* FirstPlayerPS = AllPlayerControllers[0]->GetPlayerState<AJinPlayerState>();
+
 		if (IsValid(FirstPlayerPS))
 		{
 			JinGS->CurrentPlayer = FirstPlayerPS;
 			for (const auto& PC : AllPlayerControllers)
 			{
 				PC->NotificationText = FText::FromString(FString::Printf(TEXT("%s 의 차례입니다."), *FirstPlayerPS->PlayerName));
-				PC->ClientRPCShowNotificationWidget(30.0f);
+				PC->ClientRPCShowNotificationWidget(TurnTimeLimit);
 			}
+			
+			GetWorldTimerManager().SetTimer(
+			TurnTimeLimitTimerHandle,
+			this,
+				&AJinGameModeBase::SwitchTurn,
+			TurnTimeLimit,
+			false);
 		}
 		return;
 	}
@@ -304,7 +293,7 @@ void AJinGameModeBase::SwitchTurn()
 			for (const auto& PC:AllPlayerControllers)
 			{
 				PC->NotificationText = FText::FromString(FString::Printf(TEXT("%s 의 차례입니다."), *Player2->PlayerName));
-				PC->ClientRPCShowNotificationWidget(30.0f);
+				PC->ClientRPCShowNotificationWidget(TurnTimeLimit);
 			}
 		}
 		else
@@ -315,9 +304,16 @@ void AJinGameModeBase::SwitchTurn()
 			for (const auto& PC:AllPlayerControllers)
 			{
 				PC->NotificationText = FText::FromString(FString::Printf(TEXT("%s 의 차례입니다."), *Player1->PlayerName));
-				PC->ClientRPCShowNotificationWidget(30.0f);
+				PC->ClientRPCShowNotificationWidget(TurnTimeLimit);
 			}
 		}
+		
+		GetWorldTimerManager().SetTimer(
+		TurnTimeLimitTimerHandle,
+		this,
+		&AJinGameModeBase::SwitchTurn,
+		TurnTimeLimit,
+		false);
 	}
 }
 

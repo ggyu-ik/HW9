@@ -18,12 +18,8 @@ public:
 	UPROPERTY(Replicated)
 	AJinPlayerState* CurrentPlayer = nullptr;
 	
-	float TurnTimeLimit;
-	
 	UPROPERTY(Replicated)
-	float RemainingTime; // 턴 남은 시간
-	
-	FTimerHandle TurnTimeLimitTimerHandle;
+	float RemainingTime;
 	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

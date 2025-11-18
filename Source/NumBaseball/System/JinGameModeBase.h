@@ -12,6 +12,8 @@ class NUMBASEBALL_API AJinGameModeBase : public AGameModeBase
 	GENERATED_BODY()
 	
 public:
+	AJinGameModeBase();
+	
 	virtual void OnPostLogin(AController* NewPlayer) override;
 	
 	virtual void BeginPlay() override;
@@ -37,9 +39,13 @@ public:
 	FTimerHandle GameResetTimerHandle;
 	
 	FTimerHandle SwitchTurnDelayTimerHandle;
+	
+	FTimerHandle TurnTimeLimitTimerHandle;
 
 protected:
 	FString RandomNumber;
 	
 	TArray<TObjectPtr<AJinPlayerController>> AllPlayerControllers;
+
+	float TurnTimeLimit;
 };
