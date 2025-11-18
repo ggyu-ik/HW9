@@ -34,7 +34,13 @@ void AJinGameModeBase::OnPostLogin(AController* NewPlayer)
 	
 	if (AllPlayerControllers.Num() == 2) // 2명이상이 되면 첫 플레이어 정함
 	{
-		SetFirstPlayer();
+		// 약간의 지연을 두고 SwitchTurn 호출 (PlayerState 복제 완료 대기)
+		GetWorldTimerManager().SetTimer(
+			SwitchTurnDelayTimerHandle,
+			this,
+			&AJinGameModeBase::SwitchTurn,
+			0.1f,
+			false);
 	}
 }
 
@@ -266,7 +272,20 @@ void AJinGameModeBase::SwitchTurn()
 		return;
 	}
 	
-	if ()
+	if (JinGS->CurrentPlayer == nullptr)
+	{
+		AJinPlayerState* FirstPlayerPS = AllPlayerControllers[0]->GetPlayerState<AJinPlayerState>();
+		if (IsValid(FirstPlayerPS))
+		{
+			JinGS->CurrentPlayer = FirstPlayerPS;
+			for (const auto& PC : AllPlayerControllers)
+			{
+				PC->NotificationText = FText::FromString(TEXT("플레이어1 의 차례입니다."));
+				PC->ClientRPCShowNotificationWidget(30.0f);
+			}
+		}
+		return;
+	}
 	
 	if (AllPlayerControllers.Num() == 2) // 2인 기준
 	{
@@ -314,19 +333,4 @@ bool AJinGameModeBase::CanPlayerChat(AJinPlayerController* PC)
 	}
 	
 	return true;
-}
-
-void AJinGameModeBase::SetFirstPlayer()
-{
-	AJinGameStateBase* JinGS = GetGameState<AJinGameStateBase>();
-		
-	if (IsValid(JinGS))
-	{
-		AJinPlayerState* FirstPlayer = AllPlayerControllers[0]->GetPlayerState<AJinPlayerState>();
-		JinGS->CurrentPlayer = FirstPlayer;
-	}
-	for (const auto& PC : AllPlayerControllers)
-	{
-		PC->NotificationText = FText::FromString(TEXT("플레이어1 의 차례입니다."));
-	}
 }

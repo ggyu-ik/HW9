@@ -34,9 +34,9 @@ public:
 	
 	bool CanPlayerChat(AJinPlayerController* PC);
 	
-	void SetFirstPlayer();
-	
 	FTimerHandle GameResetTimerHandle;
+	
+	FTimerHandle SwitchTurnDelayTimerHandle;
 
 protected:
 	FString RandomNumber;
