@@ -25,4 +25,5 @@ void AJinGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
 	DOREPLIFETIME(AJinGameStateBase, CurrentPlayer);
+	DOREPLIFETIME(AJinGameStateBase, RemainingTime);
 }

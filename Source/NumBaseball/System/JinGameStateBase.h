@@ -18,7 +18,7 @@ public:
 	UPROPERTY(Replicated)
 	AJinPlayerState* CurrentPlayer = nullptr;
 	
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, BlueprintReadOnly)
 	float RemainingTime;
 	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
