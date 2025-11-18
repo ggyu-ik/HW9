@@ -195,16 +195,20 @@ void AJinGameModeBase::ResetGame()
 {
 	RandomNumber = GenerateRandomNum();
 	
-	for (const auto& PC : AllPlayerControllers)
+	AJinGameStateBase* JinGS = GetGameState<AJinGameStateBase>();
+	if(IsValid(JinGS))
 	{
-		AJinPlayerState* JinPS = PC->GetPlayerState<AJinPlayerState>();
-		
-		PC->NotificationText = FText::FromString(TEXT("새로운 게임이 시작됐습니다."));
-		PC->ClientRPCShowNotificationWidget(3.0f);
-		
-		if (IsValid(JinPS))
+		for (const auto& PC : AllPlayerControllers)
 		{
-			JinPS->CurrentGuessCount = 0;
+			AJinPlayerState* JinPS = PC->GetPlayerState<AJinPlayerState>();
+			
+			PC->NotificationText = FText::FromString(FString::Printf(TEXT("%s 의 차례입니다."), *JinGS->CurrentPlayer->PlayerName));
+			PC->ClientRPCShowNotificationWidget(3.0f);
+			
+			if (IsValid(JinPS))
+			{
+				JinPS->CurrentGuessCount = 0;
+			}
 		}
 	}
 }
@@ -280,7 +284,7 @@ void AJinGameModeBase::SwitchTurn()
 			JinGS->CurrentPlayer = FirstPlayerPS;
 			for (const auto& PC : AllPlayerControllers)
 			{
-				PC->NotificationText = FText::FromString(TEXT("플레이어1 의 차례입니다."));
+				PC->NotificationText = FText::FromString(FString::Printf(TEXT("%s 의 차례입니다."), *FirstPlayerPS->PlayerName));
 				PC->ClientRPCShowNotificationWidget(30.0f);
 			}
 		}
@@ -299,7 +303,7 @@ void AJinGameModeBase::SwitchTurn()
 			
 			for (const auto& PC:AllPlayerControllers)
 			{
-				PC->NotificationText = FText::FromString(TEXT("플레이어2 의 차례입니다."));
+				PC->NotificationText = FText::FromString(FString::Printf(TEXT("%s 의 차례입니다."), *Player2->PlayerName));
 				PC->ClientRPCShowNotificationWidget(30.0f);
 			}
 		}
@@ -310,7 +314,7 @@ void AJinGameModeBase::SwitchTurn()
 			
 			for (const auto& PC:AllPlayerControllers)
 			{
-				PC->NotificationText = FText::FromString(TEXT("플레이어1 의 차례입니다."));
+				PC->NotificationText = FText::FromString(FString::Printf(TEXT("%s 의 차례입니다."), *Player1->PlayerName));
 				PC->ClientRPCShowNotificationWidget(30.0f);
 			}
 		}
