@@ -245,6 +245,7 @@ void AJinGameModeBase::JudgeGame(AJinPlayerController* ChattingPlayerController,
 			PC->NotificationText = FText::FromString(CombineMessage);
 			PC->ClientRPCShowNotificationWidget(5.0f);
 		}
+		GetWorldTimerManager().PauseTimer(TurnTimerHandle);
 		
 		GetWorldTimerManager().SetTimer(
 		GameResetTimerHandle,
